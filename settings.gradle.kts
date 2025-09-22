@@ -6,4 +6,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "CuriousMicroBrenchmarks"
+rootProject.name = "CuriousMicroBenchmarks"
