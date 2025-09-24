@@ -2,6 +2,7 @@ package edu.adarko22;
 
 
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,30 +20,30 @@ import java.util.stream.LongStream;
 @Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 15, time = 1, timeUnit = TimeUnit.SECONDS)
 public class JavaBinarySearchBenchmark {
-
-    private static Long SIZE = 10_000_000L;
     private LinkedList<Long> linkedListOfRandom;
     private ArrayList<Long> arrayListOfRandom;
 
+    @Param({"1000", "1000000", "10000000"})
+    Long size = 0L;
     @Param(value = {"0", "1", "5000000"})
     Long target = 0L;
 
     @Setup(Level.Trial)
     public void setup() {
-        var sortedList = LongStream.rangeClosed(1L, SIZE).boxed().toList();
+        var sortedList = LongStream.rangeClosed(1L, size).boxed().toList();
         linkedListOfRandom = new LinkedList<>(sortedList);
         arrayListOfRandom = new ArrayList<>(sortedList);
     }
 
     @Benchmark
-    public void javaCollectionsBinarySearchLinkedList() {
+    public void javaCollectionsBinarySearchLinkedList(Blackhole blackhole) {
         var result = Collections.binarySearch(linkedListOfRandom, target);
-        assert (result >= 0);
+        blackhole.consume(result);
     }
 
     @Benchmark
-    public void javaCollectionsBinarySearchArrayList() {
+    public void javaCollectionsBinarySearchArrayList(Blackhole blackhole) {
         var result = Collections.binarySearch(arrayListOfRandom, target);
-        assert (result >= 0);
+        blackhole.consume(result);
     }
 }

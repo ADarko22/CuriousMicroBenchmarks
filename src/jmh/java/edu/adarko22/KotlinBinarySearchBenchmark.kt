@@ -12,6 +12,7 @@ import org.openjdk.jmh.annotations.Scope
 import org.openjdk.jmh.annotations.Setup
 import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.annotations.Warmup
+import org.openjdk.jmh.infra.Blackhole
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -40,12 +41,15 @@ import java.util.concurrent.TimeUnit
 @Measurement(iterations = 15, time = 1, timeUnit = TimeUnit.SECONDS)
 open class KotlinBinarySearchBenchmark {
 
-    private val size = 10_000_000L
     private lateinit var linkedListOfRandom: LinkedList<Long>
     private lateinit var arrayListOfRandom: ArrayList<Long>
 
+
+    @Param("1000", "1000000", "10000000")
+    var size = 0L
+
     @Param("0", "1", "5000000")
-    var target: Long = 0
+    var target = 0L
 
     @Setup(Level.Trial)
     fun setup() {
@@ -55,15 +59,14 @@ open class KotlinBinarySearchBenchmark {
     }
 
     @Benchmark
-    fun binarySearchLinkedList() {
+    fun binarySearchLinkedList(blackhole: Blackhole) {
         val result = linkedListOfRandom.binarySearch(target)
-        assert(result >= 0)
+        blackhole.consume(result)
     }
 
     @Benchmark
-    fun binarySearchArrayList() {
+    fun binarySearchArrayList(blackhole: Blackhole) {
         val result = arrayListOfRandom.binarySearch(target)
-        assert(result >= 0)
+        blackhole.consume(result)
     }
-
 }
