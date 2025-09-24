@@ -1,6 +1,17 @@
 package edu.adarko22
 
-import org.openjdk.jmh.annotations.*
+import org.openjdk.jmh.annotations.Benchmark
+import org.openjdk.jmh.annotations.BenchmarkMode
+import org.openjdk.jmh.annotations.Fork
+import org.openjdk.jmh.annotations.Level
+import org.openjdk.jmh.annotations.Measurement
+import org.openjdk.jmh.annotations.Mode
+import org.openjdk.jmh.annotations.OutputTimeUnit
+import org.openjdk.jmh.annotations.Param
+import org.openjdk.jmh.annotations.Scope
+import org.openjdk.jmh.annotations.Setup
+import org.openjdk.jmh.annotations.State
+import org.openjdk.jmh.annotations.Warmup
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -19,21 +30,21 @@ import java.util.concurrent.TimeUnit
  *      - Binary Search on ArrayList takes approximately 2 to 22 nanoseconds
  *  In this specific setup, Binary Search on ArrayList is almost a 1 Million times faster than LinkedList!
  *
- * Run with `./gradlew jmh -Pjmh.includes=edu.adarko22.BinarySearchBenchmark`
+ * Run with `./gradlew jmh -Pjmh.includes=edu.adarko22.KotlinBinarySearchBenchmark`
  */
 @State(Scope.Benchmark)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Fork(1)
-@Warmup(iterations = 2, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-open class BinarySearchBenchmark {
+@Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 15, time = 1, timeUnit = TimeUnit.SECONDS)
+open class KotlinBinarySearchBenchmark {
 
     private val size = 10_000_000L
     private lateinit var linkedListOfRandom: LinkedList<Long>
     private lateinit var arrayListOfRandom: ArrayList<Long>
 
-    @Param("1", "5000000", "9999999")
+    @Param("0", "1", "5000000")
     var target: Long = 0
 
     @Setup(Level.Trial)
@@ -54,4 +65,5 @@ open class BinarySearchBenchmark {
         val result = arrayListOfRandom.binarySearch(target)
         assert(result >= 0)
     }
+
 }
