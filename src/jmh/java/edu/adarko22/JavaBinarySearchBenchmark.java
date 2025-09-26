@@ -17,8 +17,8 @@ import java.util.stream.LongStream;
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Fork(1)
-@Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 15, time = 1, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 public class JavaBinarySearchBenchmark {
     private LinkedList<Long> linkedListOfRandom;
     private ArrayList<Long> arrayListOfRandom;
