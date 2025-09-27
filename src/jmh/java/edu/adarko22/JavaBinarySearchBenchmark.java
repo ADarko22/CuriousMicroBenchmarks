@@ -17,15 +17,15 @@ import java.util.stream.LongStream;
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Fork(1)
-@Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 2, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
 public class JavaBinarySearchBenchmark {
     private LinkedList<Long> linkedListOfRandom;
     private ArrayList<Long> arrayListOfRandom;
 
-    @Param({"1000", "1000000", "10000000"})
+    @Param({"100", "1000", "10000", "100000", "1000000", "10000000"})
     Long size = 0L;
-    @Param(value = {"0", "1", "5000000"})
+    @Param(value = {"-1", "1"})
     Long target = 0L;
 
     @Setup(Level.Trial)

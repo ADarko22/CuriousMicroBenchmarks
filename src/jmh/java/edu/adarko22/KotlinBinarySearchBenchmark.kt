@@ -45,10 +45,10 @@ open class KotlinBinarySearchBenchmark {
     private lateinit var arrayListOfRandom: ArrayList<Long>
 
 
-    @Param("1000", "1000000", "10000000")
+    @Param("100", "1000", "10000", "100000", "1000000", "10000000")
     var size = 0L
 
-    @Param("0", "1", "5000000")
+    @Param("-1", "1")
     var target = 0L
 
     @Setup(Level.Trial)
