@@ -18,10 +18,20 @@ which will evaluate Standard, Custom and 3rd Party implementations of Data Struc
 
 ## Get Started
 
-Run all the benchmarks `./gradlew jmh`.
+Feel free the tune the Benchmarks, available in [src/jmh/java/edu/adarko22](src/jmh/java/edu/adarko22),
+with your parameters by changing the warm-up, the iterations and more configs.
 
-Alternatively run a specific benchmark, for
-example [JavaBinarySearchBenchmark](src/jmh/java/edu/adarko22/JavaBinarySearchBenchmark.java) with
-`./gradlew jmh -Pjmh.includes=edu.adarko22.JavaBinarySearchBenchmark`.
+### Run jmh benchmarks
 
-Feel free the tune the Benchmarks with your parameters by changing the warm-up, the iterations and more configs.
+Use the `me.champeau.jmh` Gradle Plugin to run all or a specific Benchmark:
+
+- Run all the benchmarks: `./gradlew jmh`.
+- un a specific benchmark, i.e. [JavaBinarySearchBenchmark](src/jmh/java/edu/adarko22/JavaBinarySearchBenchmark.java):
+  `./gradlew jmh -Pjmh.includes=edu.adarko22.JavaBinarySearchBenchmark`.
+
+### Run jmh benchmark & Generate a Plot
+
+Use the custom Gradle Plugin `runJmhAndPlot` by specifying the `benchmarkClass` and the `xAxisParameter`.
+
+For example: `./gradlew runJmhAndPlot -PbenchmarkClass=edu.adarko22.JavaBinarySearchBenchmark -PxAxisParameter=size`
+
