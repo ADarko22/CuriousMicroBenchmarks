@@ -22,4 +22,4 @@ tasks.test {
     useJUnitPlatform()
 }
 
-apply<edu.adarko22.jmh.RunJmhAndPlotPlugin>()
+apply<edu.adarko22.jmh.CustomJmhPlugin>()
