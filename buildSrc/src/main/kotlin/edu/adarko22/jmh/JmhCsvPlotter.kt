@@ -53,75 +53,100 @@ object JmhCsvPlotter {
         if (!outputDir.exists()) outputDir.mkdirs()
 
         if (splitByBenchmark) {
-            jmhCsvResults.groupBy { it.benchmark }
-                .forEach { (benchmarkName, benchmarkResults) ->
-                    val parts = benchmarkName.split(".")
-                    val benchmarkClass = parts.getOrNull(parts.size - 2) ?: "UnknownClass"
-                    val title = parts.lastOrNull() ?: "Benchmark"
-                    val unit = benchmarkResults.firstOrNull()?.yDataUnit ?: "units"
-
-                    val xs = benchmarkResults.map { it.xParamData.toDouble() }
-                    val ys = benchmarkResults.map { it.yData }
-                    val isLogScale = shouldUseLogScale(ys)
-
-                    val chart = XYChartBuilder()
-                        .width(computeChartSize(xs, isLogScale))
-                        .height(computeChartSize(ys, isLogScale, isYAxis = true))
-                        .title(title)
-                        .xAxisTitle(xParamHeader)
-                        .yAxisTitle(unit)
-                        .build()
-
-                    styleChart(chart, benchmarkResults.size, isLogScale, zParamHeader != null)
-
-                    // Plot each zParam group as a separate series
-                    benchmarkResults.groupBy { it.zParamLabel }
-                        .forEach { (zLabel, groupedJmhCsvResults) ->
-                            val xsGroup = groupedJmhCsvResults.map { it.xParamData }
-                            val ysGroup = groupedJmhCsvResults.map { it.yData }
-                            val label = zLabel?.let { "$zParamHeader=$it" } ?: "Default"
-                            val series = chart.addSeries(label, xsGroup, ysGroup)
-                            series.marker = SeriesMarkers.CIRCLE
-                        }
-
-                    val outputFile = File(outputDir, "$benchmarkClass-$title.png")
-                    BitmapEncoder.saveBitmap(chart, outputFile.absolutePath, BitmapEncoder.BitmapFormat.PNG)
-                    println("✅ Plot saved to: ${outputFile.absolutePath}")
-                }
+            plotMultipleChartsByBenchmark(jmhCsvResults, xParamHeader, zParamHeader, outputDir)
         } else {
-            val benchmarkClass = jmhCsvResults.first().benchmark.split(".")
-                .let { it.getOrNull(it.size - 2) ?: "UnknownClass" }
-            val unit = jmhCsvResults.firstOrNull()?.yDataUnit ?: "units"
-
-            val xs = jmhCsvResults.map { it.xParamData.toDouble() }
-            val ys = jmhCsvResults.map { it.yData }
-            val isLogScale = shouldUseLogScale(ys)
-
-            val chart = XYChartBuilder()
-                .width(computeChartSize(xs, isLogScale))
-                .height(computeChartSize(ys, isLogScale, isYAxis = true))
-                .xAxisTitle(xParamHeader)
-                .yAxisTitle(unit)
-                .build()
-
-            styleChart(chart, jmhCsvResults.size, isLogScale, true)
-
-            jmhCsvResults.groupBy { it.benchmark }
-                .forEach { (benchmarkName, benchmarkResults) ->
-                    val benchmarkFunction = jmhCsvResults.first().benchmark.split(".")
-                        .let { it.getOrNull(it.size - 2) ?: "UnknownFunction" }
-
-                    val xsGroup = benchmarkResults.map { it.xParamData }
-                    val ysGroup = benchmarkResults.map { it.yData }
-                    val ysErrors = benchmarkResults.map { it.yDataError }
-                    val series = chart.addSeries(benchmarkFunction, xsGroup, ysGroup, ysErrors)
-                    series.marker = SeriesMarkers.CIRCLE
-                }
-
-            val outputFile = File(outputDir, "$benchmarkClass-all.png")
-            BitmapEncoder.saveBitmap(chart, outputFile.absolutePath, BitmapEncoder.BitmapFormat.PNG)
-            println("✅ Plot saved to: ${outputFile.absolutePath}")
+            plotSingleChart(jmhCsvResults, xParamHeader, zParamHeader, outputDir)
         }
+    }
+
+    private fun plotMultipleChartsByBenchmark(
+        results: List<JmhCsvResult>,
+        xParamHeader: String,
+        zParamHeader: String?,
+        outputDir: File
+    ) {
+        results.groupBy { it.benchmark }
+            .forEach { (benchmarkName, benchmarkResults) ->
+                val parts = benchmarkName.split(".")
+                val benchmarkClass = parts.getOrNull(parts.size - 2) ?: "UnknownClass"
+                val title = parts.lastOrNull() ?: "Benchmark"
+                val unit = benchmarkResults.firstOrNull()?.yDataUnit ?: "units"
+
+                val xs = benchmarkResults.map { it.xParamData.toDouble() }
+                val ys = benchmarkResults.map { it.yData }
+                val isLogScale = shouldUseLogScale(ys)
+
+                val chart = XYChartBuilder()
+                    .width(computeChartSize(xs, isLogScale))
+                    .height(computeChartSize(ys, isLogScale, isYAxis = true))
+                    .title(title)
+                    .xAxisTitle(xParamHeader)
+                    .yAxisTitle(unit)
+                    .build()
+
+                styleChart(chart, benchmarkResults.size, isLogScale, zParamHeader != null)
+
+                benchmarkResults.groupBy { it.zParamLabel }
+                    .forEach { (zLabel, groupedResults) ->
+                        val xsGroup = groupedResults.map { it.xParamData }
+                        val ysGroup = groupedResults.map { it.yData }
+                        val label = zLabel?.let { "$zParamHeader=$it" } ?: "Default"
+                        val series = chart.addSeries(label, xsGroup, ysGroup)
+                        series.marker = SeriesMarkers.CIRCLE
+                    }
+
+                val outputFile = File(outputDir, "$benchmarkClass-$title.png")
+                BitmapEncoder.saveBitmap(chart, outputFile.absolutePath, BitmapEncoder.BitmapFormat.PNG)
+                println("✅ Plot saved to: ${outputFile.absolutePath}")
+            }
+    }
+
+    private fun plotSingleChart(
+        results: List<JmhCsvResult>,
+        xParamHeader: String,
+        zParamHeader: String?,
+        outputDir: File
+    ) {
+        if (results.isEmpty()) return
+
+        val benchmarkClass = results.first().benchmark.split(".")
+            .getOrNull(results.first().benchmark.split(".").size - 2) ?: "UnknownClass"
+        val unit = results.first().yDataUnit
+
+        val xs = results.map { it.xParamData.toDouble() }
+        val ys = results.map { it.yData }
+        val isLogScale = shouldUseLogScale(ys)
+
+        val chart = XYChartBuilder()
+            .width(computeChartSize(xs, isLogScale))
+            .height(computeChartSize(ys, isLogScale, isYAxis = true))
+            .xAxisTitle(xParamHeader)
+            .yAxisTitle(unit)
+            .build()
+
+        styleChart(chart, results.size, isLogScale, true)
+
+        results.groupBy { generateSeriesLabel(it, zParamHeader) }
+            .forEach { (seriesLabel, seriesData) ->
+                val xsGroup = seriesData.map { it.xParamData }
+                val ysGroup = seriesData.map { it.yData }
+                // todo not use error bars when it's logarithmic scale
+                val series = chart.addSeries(seriesLabel, xsGroup, ysGroup)
+                series.marker = SeriesMarkers.CIRCLE
+            }
+
+        val outputFile = File(outputDir, "$benchmarkClass-all.png")
+        BitmapEncoder.saveBitmap(chart, outputFile.absolutePath, BitmapEncoder.BitmapFormat.PNG)
+        println("✅ Plot saved to: ${outputFile.absolutePath}")
+    }
+
+    private fun generateSeriesLabel(result: JmhCsvResult, zParamHeader: String?): String {
+        val zLabel = zParamHeader?.let { z ->
+            result.zParamLabel?.let { "$z=$it" }
+        }
+
+        val benchmarkShort = result.benchmark.split(".").lastOrNull() ?: result.benchmark
+        return if (zLabel != null) "$zLabel • $benchmarkShort" else benchmarkShort
     }
 
     // Styles the chart to improve readability and visual appeal
