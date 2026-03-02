@@ -22,4 +22,10 @@ tasks.test {
     useJUnitPlatform()
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(23))
+    }
+}
+
 apply<edu.adarko22.jmh.CustomJmhPlugin>()
